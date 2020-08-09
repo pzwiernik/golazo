@@ -2,8 +2,8 @@
 #'
 #' This is simply running golazo() with L_ij=0 and U_ij=rho.
 #' @param S the sample covariance matrix
-#' @param rho the penalty on the positive entries of K (can be Inf)
-#' @param tol the convergence tolerance (default tol=1e-7)
+#' @param rho the penalty on the positive entries of K (can be Inf).
+#' @param tol the convergence tolerance (default tol=1e-7).
 #' @param diagonal.pen if FALSE (default) the diagonal of K is not penalized.
 #' @param verbose if TRUE (default) the output will be printed.
 #' @return the optimal value of the concentration matrix
