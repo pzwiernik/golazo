@@ -18,8 +18,6 @@ This vignette shows how to work with  the package `golazo`. GOLAZO is a generali
 
 
 ```{r message = FALSE, warning = FALSE}
-library(devtools)
-install_github("pzwiernik/golazo")
 library(golazo)
 ```
 
