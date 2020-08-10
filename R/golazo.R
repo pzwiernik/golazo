@@ -37,8 +37,8 @@ golazo <- function(S,L,U,tol=1e-7,verbose=TRUE){
     # save the diagonals for later
     dU <- diag(U)
     dL <- diag(L)
-    U <- pmin(U,-S+aux+1) # +1 only for stability
-    L <- pmax(L,-S-aux-1) # -1 only for stability
+    U <- pmin(U,-S+aux)
+    L <- pmax(L,-S-aux)
     diag(U) <- dU
     diag(L) <- dL
   }
@@ -81,12 +81,29 @@ golazo <- function(S,L,U,tol=1e-7,verbose=TRUE){
     cat("Iteration | Dual Gap\n")
   }
   dualgap <- Inf
+  eqs <- neqs <- list()
+  for (j in 1:d){
+    eqs[[j]] <- which(L[j,-j]==U[j,-j])
+    neqs[[j]] <- which(L[j,-j]<U[j,-j])
+  }
   while(dualgap > tol){
     A <- rbind(diag(d-1),-diag(d-1))
     for (j in 1:d){
-      b <- c(S[j,-j]+L[j,-j],-(S[j,-j]+U[j,-j]))
-      y <- quadprog::solve.QP(Dmat=solve(Sig[-j,-j]),dvec=rep(0,d-1),Amat=t(A),bvec=b)$solution
-      Sig[j,-j] <- Sig[-j,j] <- y
+      if (length(eqs[[j]])==0){
+        # in our canonical applications this is what we end up doing
+        b <- c(S[j,-j]+L[j,-j],-(S[j,-j]+U[j,-j]))
+        y <- quadprog::solve.QP(Dmat=solve(Sig[-j,-j]),dvec=rep(0,d-1),Amat=t(A),bvec=b)$solution
+        Sig[j,-j] <- Sig[-j,j] <- y
+      } else {
+        # this looks a bit complicated but equality constraints are tricky
+        # we add it for completeness but typically this is not needed in our canonical applications
+        Ap <- rbind(diag(d-1)[eqs[[j]],],diag(d-1)[neqs[[j]],],-diag(d-1)[neqs[[j]],])
+        ll <- S[j,-j]+L[j,-j]
+        uu <- -(S[j,-j]+U[j,-j])
+        b <- c(ll[eqs[[j]]],ll[neqs[[j]]],uu[neqs[[j]]])
+        y <- quadprog::solve.QP(Dmat=solve(Sig[-j,-j]),dvec=rep(0,d-1),Amat=t(Ap),bvec=b,meq=length(eqs[[j]]))$solution
+        Sig[j,-j] <- Sig[-j,j] <- y
+      }
     }
     it <- it+1
     K <- solve(Sig)
