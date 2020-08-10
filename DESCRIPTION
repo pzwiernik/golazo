@@ -11,3 +11,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 Imports:
     quadprog
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
