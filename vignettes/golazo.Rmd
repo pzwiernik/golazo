@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to work with  the package `golazo`. GOLAZO is a generalized approach for penalized log-likelihood estimation where the l1-penalty used in GLASSO is replaced with a general assymetric type of penalty. More precisely for a non-positive matrix L and a nonnegative matrix U we maximize $\log\det(K)-{\rm tr}(SK)+\sum_{i,j}\max\{L_{ij}K_{ij},U_{ij}K_{ij}\}$. The algorithm optimizes the dual problem using a block coordinate descent updates. 
+This vignette shows how to work with  the package `golazo`. GOLAZO is a generalized approach for penalized log-likelihood estimation where the l1-penalty used in GLASSO is replaced with a general assymetric type of penalty. More precisely for a non-positive matrix L and a nonnegative matrix U we minimize $=\log\det(K)+{\rm tr}(SK)+\sum_{i,j}\max\{L_{ij}K_{ij},U_{ij}K_{ij}\}$. The algorithm optimizes the dual problem using a block coordinate descent updates. 
 
 
 ```{r message = FALSE, warning = FALSE}
@@ -65,7 +65,7 @@ print(round(res$K,3))
 
 ## Graphical LASSO
 
-Graphical LASSO is a special case of GOLAZO. Here we optimize $\log\det K +{\rm tr}(SK)+\rho \sum_{i,j}|K_{ij}|$.
+Graphical LASSO is a special case of GOLAZO. Here we optimize $-\log\det K +{\rm tr}(SK)+\rho \sum_{i,j}|K_{ij}|$.
 
 ```{r }
 L <- matrix(-rho,d,d)
@@ -74,7 +74,7 @@ res <- golazo(R,L=L,U=U)
 print(round(res$K,3))
 ```
 
-This version puts the same penalty on all entries of the inverse covariance matrix. This introduces an unnecessary bias. It is better to run a version with no penalty on the diagonal (both L and U are zero on the diagonal). Here we optimize $\log\det K +{\rm tr}(SK)+\rho\sum_{i\neq j}|K_{ij}|$.
+This version puts the same penalty on all entries of the inverse covariance matrix. This introduces an unnecessary bias. It is better to run a version with no penalty on the diagonal (both L and U are zero on the diagonal). Here we optimize $-\log\det K +{\rm tr}(SK)+\rho\sum_{i\neq j}|K_{ij}|$.
 
 ```{r }
 L <- matrix(-rho,d,d)
@@ -179,24 +179,14 @@ print(round(Kglasso,3))
 It turns out that here the estimator is also an M-matrix. The estimated graphs look similar but the positive GOLAZO estimate gives the higher likelihood value.
 
 ```{r message=FALSE}
-c(log(det(Khat))-sum(diag(R%*%Khat)),log(det(Kglasso))-sum(diag(R%*%Kglasso)))
+(n/2)*c(log(det(Khat))-sum(diag(R%*%Khat)),log(det(Kglasso))-sum(diag(R%*%Kglasso)))
 ```
 
 Penalizing for size of the graph the EBIC criterion prefers the positive glasso estimate.
 
 ```{r}
-# number of edges
-Rhat <- cov2cor(Khat)
-Rglasso <- cov2cor(Kglasso)
-edgesK = length(which(abs(Rhat[upper.tri(abs(Rhat),diag=FALSE)])> 1e-6))
-edgesKglasso = length(which(abs(Rglasso[upper.tri(abs(Rglasso),diag=FALSE)])> 1e-6))
-#EBIC parameter
-ebic.gamma <- 0.5
-# EBIC
-ebicK <- -(n)*(log(det(Khat))-sum(diag(R%*%Khat)))+edgesK * (log(n) + 4 * ebic.gamma * log(d))
-ebicKglasso <- -(n)*(log(det(Kglasso))-sum(diag(R%*%Kglasso)))+edgesKglasso * (log(n) + 4 * ebic.gamma * log(d))
-cat("The positive glasso EBIC: ",ebicK,"\n")
-cat("The glasso EBIC: ",ebicKglasso,"\n")
+cat("The positive glasso EBIC: ",ebic$ebic[which(ebic$rhos==rho)],"\n")
+cat("The glasso EBIC: ",gebic$ebic[which(gebic$rhos==grho)],"\n")
 ```
 
 # Dual MLE estimate
@@ -229,7 +219,7 @@ Here, we need to remember that the parameter `resDLE$K` is equal to the  optimal
 One extra parameter of `la.golazo()` is `edges`. If  `edges="input"` then the edges of $\hat G$ are computed as above and the algorithm constrains only  the corresponding entries of $\Sigma$ to be nonnnegative. If  `edges="all"` then  all entries of $\Sigma$ are assumed to be nonnnnegative. In this case the algorithm computes the MLE for (positively) associated Gaussian distributions. Finally, if `edges` is an adjacency  matrix (1 for edge entries and 0 otherwise) an arbitrary  subset of the entries of $\Sigma$ can be constrained to be nonnegative.
 
 ```{r}
-resDLE <- dle.golazo(Khat)
+resDLE <- la.golazo(Khat)
 print(resDLE$Sig)
 ```
 
@@ -237,16 +227,16 @@ print(resDLE$Sig)
 The positive graphical lasso procedure already gave an edge positive distribution so  the second step does not do anything.
 
 # Locally associated distributions in one line
-Using the wrappers `positive.golazo()` and `dle.golazo()` we can now easily  compute the DLE for local association. Given a parameter rho (which can be found using EBIC) we get:
+Using the wrappers `positive.golazo()` and `la.golazo()` we can now easily  compute the DLE for local association. Given a parameter rho (which can be found using EBIC) we get:
 
 ```{r}
 res <- positive.golazo(R,rho=rho)
-resDLE <- dle.golazo(res$K)
+resDLE <- la.golazo(res$K)
 ```
 
 In our case the dataset had a very strong positive dependence information so each part of the algorithm converged in one step. 
 
 # Further topics
 
-The dataset used in this vignette was very simple and allowed to present the basic features of our approach. However, one advantage of our approach, which we did not discuss here, is that  we can carefully construct the starting point even if the input matrix S is not positive definite. Another topic that we did not cover is how to deal with possibly non-Gaussian distributions. We discuss these two topics working with more complicated datasets in our other vignettes. 
+The dataset used in this vignette was very simple and allowed to present the basic features of our approach. However, one advantage of our approach, which we did not discuss here, is that  we can carefully construct the starting point even if the input matrix S is not positive definite. Another topic that we did not cover is how to deal with possibly non-Gaussian distributions. We discuss these two topics working with more complicated datasets in our other R Markdown files in the supplementary material of Lauritzen, Zwiernik, "Locally  associated graphical models". 
 

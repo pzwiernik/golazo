@@ -1,4 +1,4 @@
-#' This is a wrapper for the dual maximum likelihood GOLAZO problem.
+#' This is a wrapper for the dual maximum likelihood GOLAZO problem to estimate locally associated distributions.
 #'
 #' The function simply running golazo() with L_ij=-Inf and U_ij=0 (for certain ij).
 #' @param K Positive semidefinite matrix. This will be typically the inverse of the sample covariance matrix or the output of a previous GOLAZO run.
@@ -16,9 +16,9 @@
 #' R <- stats::cov2cor(S)
 #' d <- nrow(R)
 #' res <- positive.golazo(R,rho=0.1)
-#' res2 <- dle.golazo(res$K)
+#' res2 <- la.golazo(res$K)
 #' print(res2$Sig)
-dle.golazo <- function(K,edges="input",tol=1e-7,verbose=TRUE){
+la.golazo <- function(K,edges="input",tol=1e-7,verbose=TRUE){
   d <- nrow(K)
   U <- matrix(0,d,d)
   if (edges[1]=="input"){

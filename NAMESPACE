@@ -2,6 +2,6 @@
 
 export(EBICgolazo)
 export(Zmatrix)
-export(dle.golazo)
 export(golazo)
+export(la.golazo)
 export(positive.golazo)
