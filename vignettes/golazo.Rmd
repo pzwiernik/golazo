@@ -1,9 +1,11 @@
 ---
 title: "Overview of  the basic GOLAZO approach"
+author: "Piotr Zwiernik"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Overview of  the basic GOLAZO approach}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 
