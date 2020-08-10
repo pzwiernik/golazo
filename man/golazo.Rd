@@ -2,27 +2,27 @@
 % Please edit documentation in R/golazo.R
 \name{golazo}
 \alias{golazo}
-\title{Performs Graphical Oriented LAZy Optimization by optimizing the dual problem.}
+\title{Performs GOLAZO algorithm by optimizing the dual problem.}
 \usage{
 golazo(S, L, U, tol = 1e-07, verbose = TRUE)
 }
 \arguments{
-\item{S}{the sample covariance matrix}
+\item{S}{Positive semidefinite matrix. This will be typically the sample covariance matrix but it can be somethink different in the dual likelihood computation or when the data follow the non-paranormal distribution.}
 
-\item{L}{matrix of lower penalties (can be -Inf)}
+\item{L}{Matrix of lower penalties. It should have all entries non-positive (-Inf is a valid entry). The entries of L say how much negative entries of the inverse of Sigma are penalized. For GLASSO all entries should of L should be -rho and all entries of U should be rho (in both cases with zero diagonal). For positive GOLAZO L should be zero and U should be like for GLASSO.}
 
-\item{U}{matrix of upper penalties (can be Inf)}
+\item{U}{Matrix of upper penalties. It should have all entries non-negative (Inf is a valid entry). The entries of U say how much positive entries of the inverse of Sigma are penalized.}
 
-\item{tol}{the convergence tolerance (default tol=1e-7)}
+\item{tol}{The convergence tolerance (default tol=1e-7). The algorithm termininnates when teh dual gap (guaranteed to be nonnegative) is less than tol.}
 
 \item{verbose}{if TRUE (default) the output will be printed.}
 }
 \value{
-the optimal value of the concentration matrix
+K the optimal value of the concentration matrix
 
-the number of iterations the algorithm needed to converge
+Sig the optimal value of the covariance matrix
 
-the corresponding value of the log-likelihood
+it the number of iterations
 }
 \description{
 This function implements a simple block-coordinate descent algorithm to find the maximum of the regularized

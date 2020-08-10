@@ -1,15 +1,15 @@
-#' Performs Graphical Oriented LAZy Optimization by optimizing the dual problem.
+#' Performs GOLAZO algorithm by optimizing the dual problem.
 #'
 #' This function implements a simple block-coordinate descent algorithm to find the maximum of the regularized
 #' Gaussiann log-likelihood  with  a an assymetric penalty of lasso type.
-#' @param S the sample covariance matrix
-#' @param L matrix of lower penalties (can be -Inf)
-#' @param U matrix of upper penalties (can be Inf)
-#' @param tol the convergence tolerance (default tol=1e-7)
+#' @param S Positive semidefinite matrix. This will be typically the sample covariance matrix but it can be somethink different in the dual likelihood computation or when the data follow the non-paranormal distribution.
+#' @param L Matrix of lower penalties. It should have all entries non-positive (-Inf is a valid entry). The entries of L say how much negative entries of the inverse of Sigma are penalized. For GLASSO all entries should of L should be -rho and all entries of U should be rho (in both cases with zero diagonal). For positive GOLAZO L should be zero and U should be like for GLASSO.
+#' @param U Matrix of upper penalties. It should have all entries non-negative (Inf is a valid entry). The entries of U say how much positive entries of the inverse of Sigma are penalized.
+#' @param tol The convergence tolerance (default tol=1e-7). The algorithm termininnates when teh dual gap (guaranteed to be nonnegative) is less than tol.
 #' @param verbose if TRUE (default) the output will be printed.
-#' @return the optimal value of the concentration matrix
-#' @return the number of iterations the algorithm needed to converge
-#' @return the corresponding value of the log-likelihood
+#' @return K the optimal value of the concentration matrix
+#' @return Sig the optimal value of the covariance matrix
+#' @return it the number of iterations
 #' @keywords coordinate descent, concentration matrix.
 #' @export
 #' @examples
@@ -38,39 +38,38 @@ golazo <- function(S,L,U,tol=1e-7,verbose=TRUE){
     dU <- diag(U)
     dL <- diag(L)
     U <- pmin(U,-S+aux)
-    V <- pmax(L,-S-aux)
+    L <- pmax(L,-S-aux)
     diag(U) <- dU
     diag(L) <- dL
   }
   ### compute the starting point
-  S <- S+diag(diag(U))
+  SU <- S+diag(diag(U))
   # the easy case is when S is bounded away from the boundary of the PSD cone
-  if (min(eigen(S)$values)>1e-4){
+  if (min(eigen(SU)$values)>1e-4){
     if (verbose==TRUE){
       cat("The algorithm is initiated at the input matrix.\n")
     }
-    Sig <- S
+    Sig <- SU
   } else{
     if (verbose==TRUE){
       cat("The input matrix is not positive definite. Computing the starting point..")
     }
     # this is the GLASSO case
     if ((min(U+diag(d))>0 && max(L-diag(d))<0)){
-      Z <- diag(diag(S))
+      Z <- diag(diag(SU))
     } else {
       if (min(U+diag(d))==0){
         cat("\n \n **Warning: This combination of L,U (with U having zero off-diagonal entries) is not supported unless S is PD..\n")
         return()
       }
-      Z <- Zmatrix(S)
+      Z <- Zmatrix(SU)
     }
     t <- 1
     # perform simple backtracing to find a feasible point
-    while(!(min(L<=round(t*(Z-S),8)) && min(round(t*(Z-S),8)<=U))){
+    while(!(min(L<=round(t*(Z-SU),8)) && min(round(t*(Z-SU),8)<=U))){
       t <- t/2
     }
-    Sig <- (1-t)*S+t*Z
-    Sig <- (1-t)*S+t*Z # this is the starting point
+    Sig <- (1-t)*SU+t*Z # this is the starting point
     if (verbose==TRUE){
       cat(" DONE\n")
     }

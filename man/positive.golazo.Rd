@@ -7,25 +7,25 @@
 positive.golazo(S, rho, tol = 1e-07, diagonal.pen = FALSE, verbose = TRUE)
 }
 \arguments{
-\item{S}{the sample covariance matrix}
+\item{S}{Positive semidefinite matrix. This will be typically the sample covariance matrix but it can be somethink different in the dual likelihood computation or when the data follow the non-paranormal distribution.}
 
-\item{rho}{the penalty on the positive entries of K (can be Inf)}
+\item{rho}{the penalty on the positive entries of K (can be Inf).}
 
-\item{tol}{the convergence tolerance (default tol=1e-7)}
+\item{tol}{The convergence tolerance (default tol=1e-7). The algorithm termininnates when teh dual gap (guaranteed to be nonnegative) is less than tol.}
 
 \item{diagonal.pen}{if FALSE (default) the diagonal of K is not penalized.}
 
 \item{verbose}{if TRUE (default) the output will be printed.}
 }
 \value{
-the optimal value of the concentration matrix
+K the optimal value of the concentration matrix
 
-the number of iterations the algorithm needed to converge
+Sig the optimal value of the covariance matrix
 
-the corresponding value of the log-likelihood
+it the number of iterations
 }
 \description{
-This is simply running golazo() with L_ij=0 and U_ij=rho.
+The function simply running golazo() with L_ij=0 and U_ij=rho.
 }
 \examples{
 data(ability.cov)

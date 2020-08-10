@@ -1,14 +1,14 @@
 #' This is a wrapper for the positive GOLAZO problem.
 #'
-#' This is simply running golazo() with L_ij=0 and U_ij=rho.
-#' @param S the sample covariance matrix
+#' The function simply running golazo() with L_ij=0 and U_ij=rho.
+#' @param S Positive semidefinite matrix. This will be typically the sample covariance matrix but it can be somethink different in the dual likelihood computation or when the data follow the non-paranormal distribution.
 #' @param rho the penalty on the positive entries of K (can be Inf).
-#' @param tol the convergence tolerance (default tol=1e-7).
+#' @param tol The convergence tolerance (default tol=1e-7). The algorithm termininnates when teh dual gap (guaranteed to be nonnegative) is less than tol.
 #' @param diagonal.pen if FALSE (default) the diagonal of K is not penalized.
 #' @param verbose if TRUE (default) the output will be printed.
-#' @return the optimal value of the concentration matrix
-#' @return the number of iterations the algorithm needed to converge
-#' @return the corresponding value of the log-likelihood
+#' @return K the optimal value of the concentration matrix
+#' @return Sig the optimal value of the covariance matrix
+#' @return it the number of iterations
 #' @keywords coordinate descent, concentration matrix.
 #' @export
 #' @examples
