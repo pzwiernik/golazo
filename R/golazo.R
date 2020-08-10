@@ -37,8 +37,8 @@ golazo <- function(S,L,U,tol=1e-7,verbose=TRUE){
     # save the diagonals for later
     dU <- diag(U)
     dL <- diag(L)
-    U <- pmin(U,-S+aux)
-    L <- pmax(L,-S-aux)
+    U <- pmin(U,-S+aux+1) # +1 only for stability
+    L <- pmax(L,-S-aux-1) # -1 only for stability
     diag(U) <- dU
     diag(L) <- dL
   }
@@ -82,12 +82,9 @@ golazo <- function(S,L,U,tol=1e-7,verbose=TRUE){
   }
   dualgap <- Inf
   while(dualgap > tol){
+    A <- rbind(diag(d-1),-diag(d-1))
     for (j in 1:d){
-      A <- rbind(diag(d-1),-diag(d-1))
       b <- c(S[j,-j]+L[j,-j],-(S[j,-j]+U[j,-j]))
-      active <- which((b>-Inf & b<Inf))
-      A <- A[active,]
-      b <- b[active]
       y <- quadprog::solve.QP(Dmat=solve(Sig[-j,-j]),dvec=rep(0,d-1),Amat=t(A),bvec=b)$solution
       Sig[j,-j] <- Sig[-j,j] <- y
     }

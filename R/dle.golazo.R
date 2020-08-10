@@ -34,7 +34,7 @@ dle.golazo <- function(K,edges="input",tol=1e-7,verbose=TRUE){
   } else{
     L <- ifelse(edges==1,-Inf,edges)
   }
-  res <- golazo(K,L,U,tol=tol,verbose=verbose)
+  res <- golazo(K,L=L,U=U,tol=tol,verbose=verbose)
   return(list(Sig=res$K,K=res$Sig,it=res$it))
 }
 
