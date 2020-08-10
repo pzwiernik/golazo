@@ -6,6 +6,8 @@ GOLAZO is a generalized approach for penalized log-likelihood estimation where t
 
 
 ```{r message = FALSE, warning = FALSE}
+library(devtools)
+install_github("pzwiernik/golazo", build_vignettes=TRUE)
 library(golazo)
 ```
 
