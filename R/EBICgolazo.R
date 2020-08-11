@@ -36,16 +36,37 @@ EBICgolazo <- function(S,n=NULL,L= NULL,U=NULL,tol=1e-6,edge.tol=1e-6,gamma=0.5,
   rhos <- seq(from=rhomin,to=rhomax,length.out=nrhos)
   ebic <- rhos
   ebic.gamma <- gamma
-  for (rho in rhos){
+
+  #setup parallel backend to use many processors
+  cores <- parallel::detectCores()
+  cl <- parallel::makeCluster(cores[1]-1) #not to overload your computer
+  doParallel::registerDoParallel(cl)
+
+  ebic <- foreach::foreach(i=1:nrhos, .combine=cbind,.packages='golazo') %dopar% {
+    rho <- rhos[i]
     LL <- rho*L
     UU <- rho*U
-    res <- golazo(S,L=LL,U=UU,tol=tol,verbose=FALSE)
+    res <- golazo::golazo(S,L=LL,U=UU,tol=tol,verbose=FALSE)
     # compute EBIC
     K <- res$K
     KR <- stats::cov2cor(K) #to make edge count independend of scalings
     nedg <- length(which(abs(KR[upper.tri(abs(KR),diag=FALSE)])> edge.tol))
-    ebic[which(rhos==rho)] <- -(n)*(log(det(K))-sum(S*K))+nedg * (log(n) + 4 * ebic.gamma * log(d))
+    temp <- -(n)*(log(det(K))-sum(S*K))+nedg * (log(n) + 4 * ebic.gamma * log(d))
+    temp
   }
+  #stop cluster
+  parallel::stopCluster(cl)
+
+  # for (rho in rhos){
+  #   LL <- rho*L
+  #   UU <- rho*U
+  #   res <- golazo(S,L=LL,U=UU,tol=tol,verbose=FALSE)
+  #   # compute EBIC
+  #   K <- res$K
+  #   KR <- stats::cov2cor(K) #to make edge count independend of scalings
+  #   nedg <- length(which(abs(KR[upper.tri(abs(KR),diag=FALSE)])> edge.tol))
+  #   ebic[which(rhos==rho)] <- -(n)*(log(det(K))-sum(S*K))+nedg * (log(n) + 4 * ebic.gamma * log(d))
+  # }
   return(list(rhos=rhos,ebic=ebic,opt.rho=rhos[min(which(ebic==min(ebic)))]))
 }
 
