@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to work with  the package `golazo`. GOLAZO is a generalized approach for penalized log-likelihood estimation where the l1-penalty used in GLASSO is replaced with a general assymetric type of penalty. More precisely for a non-positive matrix L and a nonnegative matrix U we minimize $=\log\det(K)+{\rm tr}(SK)+\sum_{i,j}\max\{L_{ij}K_{ij},U_{ij}K_{ij}\}$. The algorithm optimizes the dual problem using a block coordinate descent updates. 
+This vignette shows how to work with  the package `golazo`. GOLAZO is a generalized approach for penalized log-likelihood estimation where the l1-penalty used in GLASSO is replaced with a general assymetric type of penalty. More precisely for a non-positive matrix L and a nonnegative matrix U we minimize $-\log\det(K)+{\rm tr}(SK)+\sum_{i,j}\max\{L_{ij}K_{ij},U_{ij}K_{ij}\}$. The algorithm optimizes the dual problem using a block coordinate descent updates. 
 
 
 ```{r message = FALSE, warning = FALSE}
